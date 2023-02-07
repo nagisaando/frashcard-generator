@@ -2,20 +2,36 @@
   import svelteLogo from './assets/svelte.svg'
   import Counter from './lib/Counter.svelte'
 
-  let classContent
+  let numberr: number = 1
+  let number1
+  let classSpan: Array<Node> = []
+  let messages: Array<String> = []
+  // check how to force typescript to assign type to function
   async function loadHtml() {
     const response = await fetch('/src/class/class-1.html')
     let htmlString = await response.text()
 
     const parser = new DOMParser()
     const htmlDoc = parser.parseFromString(htmlString, 'text/html')
-    classContent = [...htmlDoc.querySelectorAll('li')]
+    classSpan = [...htmlDoc.querySelectorAll("[data-qa-id='message-text']")]
+
+    classSpan.forEach((span) => {
+      if (span instanceof HTMLElement) {
+        messages.push(span.innerText)
+      }
+    })
+    messages = messages
   }
   loadHtml()
 </script>
 
 <main>
-  <div id="class-content"><pre>{classContent}</pre></div>
+  <!-- 
+    // linting problem
+    //  Export to CSV file
+  -->
+  <div id="class-content" />
+  {messages}
   <div>
     <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
       <img src="/vite.svg" class="logo" alt="Vite Logo" />
