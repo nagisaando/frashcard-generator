@@ -2,12 +2,11 @@
   import svelteLogo from './assets/svelte.svg'
   import Counter from './lib/Counter.svelte'
 
-  let numberr: number = 1
-  let number1
   let classSpan: Array<Node> = []
   let messages: Array<String> = []
+  let messagesText: string
   // check how to force typescript to assign type to function
-  async function loadHtml() {
+  async function convertHtmlClassToMessageStrArray() {
     const response = await fetch('/src/class/class-1.html')
     let htmlString = await response.text()
 
@@ -20,9 +19,25 @@
         messages.push(span.innerText)
       }
     })
-    messages = messages
+    messagesText = messages.join('\r\n')
+    downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')
   }
-  loadHtml()
+  convertHtmlClassToMessageStrArray()
+
+  /** Download contents as a file
+   * Source: https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+   */
+  function downloadBlob(content: string, filename: string, contentType: string): void {
+    // Create a blob
+    var blob = new Blob([content], {type: contentType})
+    var url = URL.createObjectURL(blob)
+
+    // Create a link to download it
+    var pom = document.createElement('a')
+    pom.href = url
+    pom.setAttribute('download', filename)
+    pom.click()
+  }
 </script>
 
 <main>
