@@ -5,7 +5,9 @@
   let classSpan: Array<Node> = []
   let messages: Array<String> = []
   let messagesText: string
+
   // check how to force typescript to assign type to function
+  // check if there is any plugin to force to write Typescript
   async function convertHtmlClassToMessageStrArray() {
     const response = await fetch('/src/class/class-1.html')
     let htmlString = await response.text()
@@ -20,7 +22,6 @@
       }
     })
     messagesText = messages.join('\r\n')
-    downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')
   }
   convertHtmlClassToMessageStrArray()
 
@@ -60,6 +61,9 @@
     <Counter />
   </div>
 
+  <button on:click={() => downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')}
+    >produce csv file</button
+  >
   <p>
     Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer"
       >SvelteKit</a
