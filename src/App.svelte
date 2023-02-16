@@ -1,13 +1,10 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import Counter from './lib/Counter.svelte'
-
+  import ClassList from './lib/ClassList.svelte'
+  import Button, {Label} from '@smui/button'
   let classSpan: Array<Node> = []
   let messages: Array<String> = []
   let messagesText: string
 
-  // check how to force typescript to assign type to function
-  // check if there is any plugin to force to write Typescript
   async function convertHtmlClassToMessageStrArray() {
     const response = await fetch('/src/class/class-1.html')
     let htmlString = await response.text()
@@ -39,54 +36,29 @@
     pom.setAttribute('download', filename)
     pom.click()
   }
+  // create csv download button
 </script>
 
+<svelte:head>
+  <link rel="stylesheet" href="node_modules/svelte-material-ui/bare.css" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700"
+  />
+  <!-- Roboto Mono -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" />
+</svelte:head>
+
 <main>
-  <!-- 
-    // linting problem
-    //  Export to CSV file
-  -->
-  <div id="class-content" />
-  {messages}
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-      <img src="/vite.svg" class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-  <div class="card">
-    <Counter />
-  </div>
-
-  <button on:click={() => downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')}
-    >produce csv file</button
+  <h1>Frashcard generator</h1>
+  <ClassList />
+  <Button
+    on:click={() => downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')}
+    variant="raised"
   >
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer"
-      >SvelteKit</a
-    >, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">Click on the Vite and Svelte logos to learn more</p>
+    <Label>produce csv file</Label>
+  </Button>
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
 </style>
