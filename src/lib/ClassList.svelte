@@ -1,15 +1,16 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
   import DownloadButton from './DownloadButton.svelte'
-  import {onMount} from 'svelte'
+  import {onMount, onDestroy} from 'svelte'
 
-  let loaded = false
+  const classFileNumber = 24
   let classList: Array<ClassData> = []
 
   interface ClassData {
     messages: Array<HTMLElement>
     date: String | undefined
     tutor: String | undefined
+    buttonClicked: boolean | undefined
   }
 
   interface ResponseData {
@@ -27,7 +28,7 @@
 
   function getClassData(documents: Array<Document>) {
     documents.forEach((document: Document, index: number, array: Document[]) => {
-      let classData: ClassData = {messages: [], date: '', tutor: ''}
+      let classData: ClassData = {messages: [], date: '', tutor: '', buttonClicked: false}
       classData.messages = [...document.querySelectorAll("[data-qa-id='message-text']")].map(
         (el) => el as HTMLElement
       )
@@ -46,7 +47,7 @@
   }
   async function getHTMLData() {
     const requests: Array<Promise<Document>> = []
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= classFileNumber; i++) {
       async function convertHTML() {
         const response = await fetch(`/src/class/class-${i}.html`)
         const htmlString = await convertDataToHTML(response) // add more function here also fix response data
@@ -57,12 +58,35 @@
     const responses = await Promise.all(requests)
     return responses
   }
+  function onClickButton(index: number) {
+    classList[index].buttonClicked = true
+    console.log(classList)
+    classList = classList
+  }
   onMount(async () => {
-    const responses = await getHTMLData()
-    getClassData(responses)
+    const classDataFromLocalStorage = localStorage.getItem('classes')
+    let classSavedData
+    if (classDataFromLocalStorage) {
+      classSavedData = JSON.parse(localStorage.getItem('classes') || '')
+    }
+    if (classSavedData.length !== classFileNumber) {
+      const responses = await getHTMLData()
+      getClassData(responses)
+    } else {
+      classList = classSavedData
+    }
   })
+  onDestroy(() => {
+    localStorage.setItem('classes', JSON.stringify(classList))
+  })
+  function saveData() {
+    // on destroy does not work, need to find another way to save data
+    console.log(classList)
+    localStorage.setItem('classes', JSON.stringify(classList))
+  }
 </script>
 
+<button on:click={() => saveData()}>saveData</button>
 <DataTable table$aria-label="User list" style="width: 100%;">
   <Head>
     <Row>
@@ -72,11 +96,19 @@
     </Row>
   </Head>
   <Body>
-    {#each classList as classData}
+    {#each classList as classData, i}
       <Row>
         <Cell numeric>{classData.date}</Cell>
         <Cell>{classData.tutor}</Cell>
-        <Cell><DownloadButton messagesData={classData.messages} /></Cell>
+        <Cell
+          ><DownloadButton
+            on:click={() => {
+              onClickButton(i)
+            }}
+            clicked={classData.buttonClicked}
+            messagesData={classData.messages}
+          /></Cell
+        >
       </Row>
     {/each}
   </Body>

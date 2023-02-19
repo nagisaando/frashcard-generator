@@ -1,6 +1,9 @@
 <script lang="ts">
   import Button, {Label} from '@smui/button'
+  import {createEventDispatcher} from 'svelte'
   export let messagesData: HTMLElement[]
+  export let clicked: boolean | undefined
+
   /** Download contents as a file
    * Source: https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
    */
@@ -27,8 +30,18 @@
     let messagesText = messages.join('\r\n')
     downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')
   }
+
+  const dispatch = createEventDispatcher()
+  function onClick() {
+    dispatch('click')
+  }
 </script>
 
-<Button on:click={() => convertArrayToCSVString()} variant="raised">
-  <Label>download csv file</Label>
+<Button
+  on:click={() => convertArrayToCSVString()}
+  on:click={() => onClick()}
+  variant="raised"
+  style="background: {clicked ? 'grey' : ''}"
+>
+  <Label>{clicked ? 'Downloaded' : 'Download csv file'}</Label>
 </Button>
