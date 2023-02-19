@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
   import DownloadButton from './DownloadButton.svelte'
-  import {onMount, onDestroy} from 'svelte'
+  import {onMount} from 'svelte'
 
   const classFileNumber = 24
   let classList: Array<ClassData> = []
@@ -60,33 +60,29 @@
   }
   function onClickButton(index: number) {
     classList[index].buttonClicked = true
-    console.log(classList)
     classList = classList
+    localStorage.setItem('classes', JSON.stringify(classList))
   }
   onMount(async () => {
     const classDataFromLocalStorage = localStorage.getItem('classes')
-    let classSavedData
+    let classSavedData = []
     if (classDataFromLocalStorage) {
       classSavedData = JSON.parse(localStorage.getItem('classes') || '')
     }
     if (classSavedData.length !== classFileNumber) {
       const responses = await getHTMLData()
       getClassData(responses)
+
+      // need to check how to store htmlelement or convert to string before store it to localstorage
+      console.log(classList)
+      console.log(JSON.stringify(classList))
+      localStorage.setItem('classes', JSON.stringify(classList))
     } else {
       classList = classSavedData
     }
   })
-  onDestroy(() => {
-    localStorage.setItem('classes', JSON.stringify(classList))
-  })
-  function saveData() {
-    // on destroy does not work, need to find another way to save data
-    console.log(classList)
-    localStorage.setItem('classes', JSON.stringify(classList))
-  }
 </script>
 
-<button on:click={() => saveData()}>saveData</button>
 <DataTable table$aria-label="User list" style="width: 100%;">
   <Head>
     <Row>

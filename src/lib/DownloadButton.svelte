@@ -23,6 +23,7 @@
 
   function convertArrayToCSVString() {
     messagesData.forEach((message) => {
+      console.log(message)
       if (message instanceof HTMLElement) {
         messages.push(message.innerText)
       }
