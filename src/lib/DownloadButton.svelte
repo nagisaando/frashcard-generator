@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button, {Label} from '@smui/button'
   import {createEventDispatcher} from 'svelte'
-  export let messagesData: HTMLElement[]
+  export let messagesData: string[]
   export let clicked: boolean | undefined
 
   /** Download contents as a file
@@ -22,13 +22,8 @@
   // create csv download button
 
   function convertArrayToCSVString() {
-    // messagesData.forEach((message) => {
-    //   console.log(message)
-    //   if (message instanceof HTMLElement) {
-    //     messages.push(message.innerText)
-    //   }
-    // })
-    let messagesText = messages.join('\r\n')
+    // neeed to refactor
+    let messagesText = messagesData.join('\r\n')
     downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')
   }
 

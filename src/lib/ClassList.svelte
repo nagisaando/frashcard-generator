@@ -1,5 +1,6 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
+  import Switch from '@smui/switch'
   import DownloadButton from './DownloadButton.svelte'
   import {onMount} from 'svelte'
 
@@ -7,9 +8,10 @@
   let classList: Array<ClassData> = []
 
   interface ClassData {
-    messages: Array<HTMLElement>
+    messages: Array<string>
     date: String | undefined
     tutor: String | undefined
+    addedToFrashcard: boolean | undefined
     buttonClicked: boolean | undefined
   }
 
@@ -28,10 +30,18 @@
 
   function getClassData(documents: Array<Document>) {
     documents.forEach((document: Document, index: number, array: Document[]) => {
-      let classData: ClassData = {messages: [], date: '', tutor: '', buttonClicked: false}
+      let classData: ClassData = {
+        messages: [],
+        date: '',
+        tutor: '',
+        addedToFrashcard: false,
+        buttonClicked: false,
+      }
       let messageData = [...document.querySelectorAll("[data-qa-id='message-text']")]
       messageData.forEach((el) => {
-        classData.messages.push(el.innerText)
+        if (el instanceof HTMLElement) {
+          classData.messages.push(el.innerText)
+        }
       })
       classData.tutor = document.querySelector<HTMLElement>(
         "[data-qa-id='collocutor_name']"
@@ -59,10 +69,18 @@
     const responses = await Promise.all(requests)
     return responses
   }
-  function onClickButton(index: number) {
-    classList[index].buttonClicked = true
+
+  function saveClassList() {
     classList = classList
     localStorage.setItem('classes', JSON.stringify(classList))
+  }
+  function onClickButton(index: number) {
+    classList[index].buttonClicked = true
+    saveClassList()
+  }
+  function addToFrashCard(index: number) {
+    classList[index].addedToFrashcard = true
+    saveClassList()
   }
   onMount(async () => {
     const classDataFromLocalStorage = localStorage.getItem('classes')
@@ -73,11 +91,7 @@
     if (classSavedData.length !== classFileNumber) {
       const responses = await getHTMLData()
       getClassData(responses)
-
-      // need to check how to store htmlelement or convert to string before store it to localstorage
-      console.log(classList)
-      console.log(JSON.stringify(classList))
-      localStorage.setItem('classes', JSON.stringify(classList))
+      saveClassList()
     } else {
       classList = classSavedData
     }
@@ -90,6 +104,7 @@
       <Cell numeric>Date</Cell>
       <Cell style="width: 100%;">Class Instructor</Cell>
       <Cell>Action</Cell>
+      <Cell>Added to frashcard</Cell>
     </Row>
   </Head>
   <Body>
@@ -106,6 +121,12 @@
             messagesData={classData.messages}
           /></Cell
         >
+        <Cell>
+          <Switch
+            bind:checked={classData.addedToFrashcard}
+            on:SMUISwitch:change={() => addToFrashCard(i)}
+          />
+        </Cell>
       </Row>
     {/each}
   </Body>
