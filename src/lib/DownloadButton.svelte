@@ -22,12 +22,12 @@
   // create csv download button
 
   function convertArrayToCSVString() {
-    messagesData.forEach((message) => {
-      console.log(message)
-      if (message instanceof HTMLElement) {
-        messages.push(message.innerText)
-      }
-    })
+    // messagesData.forEach((message) => {
+    //   console.log(message)
+    //   if (message instanceof HTMLElement) {
+    //     messages.push(message.innerText)
+    //   }
+    // })
     let messagesText = messages.join('\r\n')
     downloadBlob(messagesText, 'export.csv', 'text/csv;charset=utf-8;')
   }

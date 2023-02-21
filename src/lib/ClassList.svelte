@@ -29,9 +29,10 @@
   function getClassData(documents: Array<Document>) {
     documents.forEach((document: Document, index: number, array: Document[]) => {
       let classData: ClassData = {messages: [], date: '', tutor: '', buttonClicked: false}
-      classData.messages = [...document.querySelectorAll("[data-qa-id='message-text']")].map(
-        (el) => el as HTMLElement
-      )
+      let messageData = [...document.querySelectorAll("[data-qa-id='message-text']")]
+      messageData.forEach((el) => {
+        classData.messages.push(el.innerText)
+      })
       classData.tutor = document.querySelector<HTMLElement>(
         "[data-qa-id='collocutor_name']"
       )?.innerText
