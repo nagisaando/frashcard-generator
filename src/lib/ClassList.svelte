@@ -4,7 +4,7 @@
   import DownloadButton from './DownloadButton.svelte'
   import {onMount} from 'svelte'
 
-  const classFileNumber = 24
+  const classFileNumber = 27
   let classList: Array<ClassData> = []
 
   interface ClassData {
@@ -83,9 +83,11 @@
     saveClassList()
   }
   onMount(async () => {
+    // need to add condition to update if new class is added
     const classDataFromLocalStorage = localStorage.getItem('classes')
     let classSavedData = []
     if (classDataFromLocalStorage) {
+      console.log('has data')
       classSavedData = JSON.parse(localStorage.getItem('classes') || '')
     }
     if (classSavedData.length !== classFileNumber) {
