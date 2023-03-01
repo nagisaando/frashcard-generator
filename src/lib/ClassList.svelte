@@ -56,9 +56,9 @@
     const parser = new DOMParser()
     return parser.parseFromString(htmlString, 'text/html')
   }
-  async function getHTMLData() {
+  async function getHTMLData(firstClassIndex: number) {
     const requests: Array<Promise<Document>> = []
-    for (let i = 1; i <= classFileNumber; i++) {
+    for (let i = firstClassIndex; i <= classFileNumber; i++) {
       async function convertHTML() {
         const response = await fetch(`/src/class/class-${i}.html`)
         const htmlString = await convertDataToHTML(response) // add more function here also fix response data
@@ -83,23 +83,30 @@
     saveClassList()
   }
   onMount(async () => {
-    // need to add condition to update if new class is added
+    async function getClasses(firstClassIndex: number) {
+      const responses = await getHTMLData(firstClassIndex)
+      getClassData(responses)
+      saveClassList()
+    }
     const classDataFromLocalStorage = localStorage.getItem('classes')
     let classSavedData = []
     if (classDataFromLocalStorage) {
-      console.log('has data')
       classSavedData = JSON.parse(localStorage.getItem('classes') || '')
     }
-    if (classSavedData.length !== classFileNumber) {
-      const responses = await getHTMLData()
-      getClassData(responses)
-      saveClassList()
-    } else {
+    if (classSavedData.length === classFileNumber) {
       classList = classSavedData
+    } else if (classSavedData.length < classFileNumber) {
+      // updates list if there is any new class
+      classList = classSavedData
+      getClasses(classSavedData.length + 1)
+    } else {
+      // if there is no class data, it will create
+      getClasses(1)
     }
   })
 </script>
 
+{classList.length}
 <DataTable table$aria-label="User list" style="width: 100%;">
   <Head>
     <Row>
