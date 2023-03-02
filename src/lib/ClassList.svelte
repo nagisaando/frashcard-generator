@@ -93,6 +93,7 @@
     if (classDataFromLocalStorage) {
       classSavedData = JSON.parse(localStorage.getItem('classes') || '')
     }
+
     if (classSavedData.length === classFileNumber) {
       classList = classSavedData
     } else if (classSavedData.length < classFileNumber) {
@@ -106,11 +107,10 @@
   })
 </script>
 
-{classList.length}
 <DataTable table$aria-label="User list" style="width: 100%;">
   <Head>
     <Row>
-      <Cell numeric>Dateee</Cell>
+      <Cell numeric>Date</Cell>
       <Cell style="width: 100%;">Class Instructor</Cell>
       <Cell>Action</Cell>
       <Cell>Added to frashcard</Cell>
