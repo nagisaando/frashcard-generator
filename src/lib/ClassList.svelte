@@ -82,6 +82,17 @@
     classList[index].addedToFrashcard = true
     saveClassList()
   }
+  async function detectLanguage(text: string) {
+    const response = await fetch(`http://localhost:3000/detect-language`, {
+      method: 'POST',
+      body: JSON.stringify({text}), // Replace with your data object
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    console.log(response)
+    // check how to send a response
+  }
   onMount(async () => {
     async function getClasses(firstClassIndex: number) {
       const responses = await getHTMLData(firstClassIndex)
