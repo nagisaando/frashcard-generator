@@ -3,6 +3,8 @@
   import Switch from '@smui/switch'
   import DownloadButton from './DownloadButton.svelte'
   import {onMount} from 'svelte'
+  import ClassInfo from './ClassInfo.svelte'
+  import Button from '@smui/button/src/Button.svelte'
 
   const classFileNumber = 27
   let classList: Array<ClassData> = []
@@ -78,22 +80,33 @@
     classList[index].buttonClicked = true
     saveClassList()
   }
+
   function addToFrashCard(index: number) {
     classList[index].addedToFrashcard = true
     saveClassList()
   }
+
+  let messages: Array<string> = []
+  function getClassInfo(index: number) {
+    messages = classList[index].messages
+  }
   async function detectLanguage(text: string) {
-    const response = await fetch(`http://localhost:3000/detect-language`, {
+    await fetch(`http://localhost:3000/detect-language`, {
       method: 'POST',
       body: JSON.stringify({text}), // Replace with your data object
       headers: {
         'Content-Type': 'application/json',
       },
     })
-    console.log(response)
+      .then((response) => response.text()) // convert the response to text format
+      .then((data) => {
+        console.log(data) // log the response data to the console
+        // use the response data as needed
+      })
     // check how to send a response
   }
   onMount(async () => {
+    detectLanguage('hey how are you')
     async function getClasses(firstClassIndex: number) {
       const responses = await getHTMLData(firstClassIndex)
       getClassData(responses)
@@ -125,6 +138,7 @@
       <Cell style="width: 100%;">Class Instructor</Cell>
       <Cell>Action</Cell>
       <Cell>Added to frashcard</Cell>
+      <Cell />
     </Row>
   </Head>
   <Body>
@@ -147,7 +161,20 @@
             on:SMUISwitch:change={() => addToFrashCard(i)}
           />
         </Cell>
+        <Cell>
+          <Button
+            on:click={() => {
+              getClassInfo(i)
+            }}>See Class info</Button
+          >
+        </Cell>
       </Row>
     {/each}
   </Body>
 </DataTable>
+
+// need to check how to detect language
+{#if messages.length > 0}
+  <h2>Show ClassInfo</h2>
+  <ClassInfo {messages} />
+{/if}
