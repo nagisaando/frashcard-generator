@@ -86,9 +86,13 @@
     saveClassList()
   }
 
-  let messages: Array<string> = []
+  let activeMessages: Array<string> = []
+  let tutor: String | undefined
+  let date: String | undefined
   function getClassInfo(index: number) {
-    messages = classList[index].messages
+    activeMessages = classList[index].messages
+    tutor = classList[index].tutor
+    date = classList[index].date
   }
   async function detectLanguage(text: string) {
     await fetch(`http://localhost:3000/detect-language`, {
@@ -173,8 +177,6 @@
   </Body>
 </DataTable>
 
-// need to check how to detect language
-{#if messages.length > 0}
-  <h2>Show ClassInfo</h2>
-  <ClassInfo {messages} />
+{#if activeMessages.length > 0}
+  <ClassInfo messages={activeMessages} {tutor} {date} />
 {/if}
