@@ -1,11 +1,16 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
   import Button, {Label} from '@smui/button'
-  import {onMount} from 'svelte'
   export let messages: string[]
   export let tutor: String | undefined
   export let date: String | undefined
 
+  interface AnalysisedMessage {
+    message: string
+    lang: string | null
+  }
+
+  let AnalysisedMessageList: AnalysisedMessage[] = []
   async function detectLanguage(text: string) {
     return await fetch(`http://localhost:3000/detect-language`, {
       method: 'POST',
@@ -20,27 +25,24 @@
       })
     // check how to send a response
   }
-  function getRevisedMessges() {
+  async function getRevisedMessges() {
     // this has to be modified
-    const requests: Array<Promise<>> = []
-    messages.forEach((message) => {
+    const requests: Array<Promise<void>> = []
+    messages.forEach((message, i) => {
       async function translateMessage() {
         const lang = await detectLanguage(message)
+        AnalysisedMessageList.push({
+          message,
+          lang,
+        })
       }
+
       requests.push(translateMessage())
     })
 
-    const requests: Array<Promise<Document>> = []
-    for (let i = firstClassIndex; i <= classFileNumber; i++) {
-      async function convertHTML() {
-        const response = await fetch(`/src/class/class-${i}.html`)
-        const htmlString = await convertDataToHTML(response) // add more function here also fix response data
-        return htmlString
-      }
-      requests.push(convertHTML())
-    }
+    await Promise.all(requests)
+    AnalysisedMessageList = AnalysisedMessageList
   }
-  onMount(() => console.log('rendered'))
 </script>
 
 <div>
@@ -52,30 +54,32 @@
     </ul>
   </dir>
   <!-- create button to analise -->
-  <Button on:click={() => getRevisedMessges()}>
+  <Button on:click={async () => await getRevisedMessges()}>
     <Label>Analysis the messages</Label>
   </Button>
 </div>
-<DataTable table$aria-label="class info" style="width: 100%; margin-top: 3rem;">
-  <Head>
-    <Row>
-      <Cell>Message</Cell>
-      <Cell>Lang</Cell>
-      <Cell>English</Cell>
-      <Cell>Spanish</Cell>
-    </Row>
-  </Head>
-  <Body>
-    {#each messages as message, i}
+{#if AnalysisedMessageList.length > 0}
+  <DataTable table$aria-label="class info" style="width: 100%; margin-top: 3rem;">
+    <Head>
       <Row>
-        <Cell>{message}</Cell>
-        <Cell />
-        <Cell />
-        <Cell />
+        <Cell>Message</Cell>
+        <Cell>Lang</Cell>
+        <Cell>English</Cell>
+        <Cell>Spanish</Cell>
       </Row>
-    {/each}
-  </Body>
-</DataTable>
+    </Head>
+    <Body>
+      {#each AnalysisedMessageList as data, i}
+        <Row>
+          <Cell>{data.message}</Cell>
+          <Cell>{data.lang}</Cell>
+          <Cell />
+          <Cell />
+        </Row>
+      {/each}
+    </Body>
+  </DataTable>
+{/if}
 
 <style lang="scss">
   @import '@material/theme/color-palette';
