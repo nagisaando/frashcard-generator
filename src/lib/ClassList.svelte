@@ -85,12 +85,16 @@
     classList[index].addedToFrashcard = true
     saveClassList()
   }
-
-  let activeMessages: Array<string> = []
+  interface ActiveMessageValue {
+    message: string
+    lang: null
+  }
+  let activeMessages: Array<ActiveMessageValue> = []
   let tutor: String | undefined
   let date: String | undefined
+
   function getClassInfo(index: number) {
-    activeMessages = classList[index].messages
+    activeMessages = classList[index].messages.map((el) => ({message: el, lang: null}))
     tutor = classList[index].tutor
     date = classList[index].date
   }

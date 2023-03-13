@@ -1,46 +1,61 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
   import Button, {Label} from '@smui/button'
-  export let messages: string[]
+  export let messages: ActiveMessageValue[]
   export let tutor: String | undefined
   export let date: String | undefined
-
+  interface ActiveMessageValue {
+    message: string
+    lang: string | null
+  }
   interface AnalysisedMessage {
     message: string
     lang: string | null
   }
 
-  let AnalysisedMessageList: AnalysisedMessage[] = []
+  let AnalysisedMessageList: (AnalysisedMessage | ActiveMessageValue)[] = messages
+  // error hangling
   async function detectLanguage(text: string) {
-    return await fetch(`http://localhost:3000/detect-language`, {
-      method: 'POST',
-      body: JSON.stringify({text}), // Replace with your data object
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.text()) // convert the response to text format
-      .then((data) => {
-        return data
+    try {
+      const response = await fetch(`http://localhost:3000/detect-language`, {
+        method: 'POST',
+        body: JSON.stringify({text}), // Replace with your data object
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
+
+      return response.text()
+    } catch (err) {
+      console.log(err)
+      return err
+    }
+
     // check how to send a response
   }
   async function getRevisedMessges() {
     // this has to be modified
+    // need different language detect
     const requests: Array<Promise<void>> = []
     messages.forEach((message, i) => {
       async function translateMessage() {
-        const lang = await detectLanguage(message)
-        AnalysisedMessageList.push({
-          message,
-          lang,
-        })
+        try {
+          const lang = await detectLanguage(message.message)
+          AnalysisedMessageList.push({
+            message: message.message,
+            lang,
+          })
+        } catch (err) {
+          console.log('hila')
+          console.log(err)
+        }
       }
 
       requests.push(translateMessage())
     })
 
     await Promise.all(requests)
+
     AnalysisedMessageList = AnalysisedMessageList
   }
 </script>
@@ -58,6 +73,7 @@
     <Label>Analysis the messages</Label>
   </Button>
 </div>
+<!-- show preview also add feature to be able to change lang and input msg -->
 {#if AnalysisedMessageList.length > 0}
   <DataTable table$aria-label="class info" style="width: 100%; margin-top: 3rem;">
     <Head>
@@ -72,7 +88,9 @@
       {#each AnalysisedMessageList as data, i}
         <Row>
           <Cell>{data.message}</Cell>
-          <Cell>{data.lang}</Cell>
+          {#if data.lang}
+            <Cell>{data.lang}</Cell>
+          {/if}
           <Cell />
           <Cell />
         </Row>
