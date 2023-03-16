@@ -13,6 +13,10 @@
     lang: string | null
   }
 
+  $: if (AnalysisedMessageList[0]?.message !== messages[0]?.message && !analyzing) {
+    AnalysisedMessageList = messages
+  }
+
   let AnalysisedMessageList: (AnalysisedMessage | ActiveMessageValue)[] = messages
   // error hangling
   async function detectLanguage(text: string) {
@@ -33,22 +37,21 @@
 
     // check how to send a response
   }
+  let analyzing = false
   async function getRevisedMessges() {
+    analyzing = true
+    AnalysisedMessageList = []
+    console.log(AnalysisedMessageList)
     // this has to be modified
     // need different language detect
     const requests: Array<Promise<void>> = []
     messages.forEach((message, i) => {
       async function translateMessage() {
-        try {
-          const lang = await detectLanguage(message.message)
-          AnalysisedMessageList.push({
-            message: message.message,
-            lang,
-          })
-        } catch (err) {
-          console.log('hila')
-          console.log(err)
-        }
+        const lang = await detectLanguage(message.message)
+        AnalysisedMessageList.push({
+          message: message.message,
+          lang,
+        })
       }
 
       requests.push(translateMessage())
@@ -57,6 +60,7 @@
     await Promise.all(requests)
 
     AnalysisedMessageList = AnalysisedMessageList
+    analyzing = false
   }
 </script>
 
@@ -74,8 +78,9 @@
   </Button>
 </div>
 <!-- show preview also add feature to be able to change lang and input msg -->
+<!-- message is not updating -->
 {#if AnalysisedMessageList.length > 0}
-  <DataTable table$aria-label="class info" style="width: 100%; margin-top: 3rem;">
+  <DataTable table$aria-label="class info" table$style="width: 100%;">
     <Head>
       <Row>
         <Cell>Message</Cell>
@@ -90,7 +95,10 @@
           <Cell>{data.message}</Cell>
           {#if data.lang}
             <Cell>{data.lang}</Cell>
+          {:else}
+            <Cell />
           {/if}
+
           <Cell />
           <Cell />
         </Row>
