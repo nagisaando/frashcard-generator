@@ -1,6 +1,9 @@
 <script lang="ts">
   import DataTable, {Head, Body, Row, Cell} from '@smui/data-table'
   import Button, {Label} from '@smui/button'
+  import Radio from '@smui/radio'
+  import FormField from '@smui/form-field'
+
   export let messages: ActiveMessageValue[]
   export let tutor: String | undefined
   export let date: String | undefined
@@ -93,8 +96,19 @@
       {#each AnalysisedMessageList as data, i}
         <Row>
           <Cell>{data.message}</Cell>
+          <!-- add the feature change locale by myself -->
           {#if data.lang}
-            <Cell>{data.lang}</Cell>
+            <Cell>
+              <div class="radio-demo">
+                {#each ['en', 'es'] as option}
+                  <FormField>
+                    <Radio bind:group={data.lang} value={option} touch /><span slot="label"
+                      >{option}</span
+                    >
+                  </FormField>
+                {/each}
+              </div>
+            </Cell>
           {:else}
             <Cell />
           {/if}
