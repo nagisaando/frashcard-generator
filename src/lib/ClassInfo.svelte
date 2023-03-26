@@ -3,24 +3,23 @@
   import Button, {Label} from '@smui/button'
   import Radio from '@smui/radio'
   import FormField from '@smui/form-field'
+  import Textfield from '@smui/textfield'
 
-  export let messages: ActiveMessageValue[]
+  export let messages: Message[]
   export let tutor: String | undefined
   export let date: String | undefined
-  interface ActiveMessageValue {
+  interface Message {
     message: string
     lang: string | null
-  }
-  interface AnalysisedMessage {
-    message: string
-    lang: string | null
+    en: string | null
+    es: string | null
   }
 
   $: if (AnalysisedMessageList[0]?.message !== messages[0]?.message && !analyzing) {
     AnalysisedMessageList = messages
   }
 
-  let AnalysisedMessageList: (AnalysisedMessage | ActiveMessageValue)[] = messages
+  let AnalysisedMessageList: Message[] = messages
   // error hangling
   async function detectLanguage(text: string) {
     try {
@@ -44,16 +43,19 @@
   async function getRevisedMessges() {
     analyzing = true
     AnalysisedMessageList = []
-    console.log(AnalysisedMessageList)
     // this has to be modified
     // need different language detect
     const requests: Array<Promise<void>> = []
     messages.forEach((message, i) => {
       async function translateMessage() {
         const lang = await detectLanguage(message.message)
+        // pass to chat gpt
+
         AnalysisedMessageList.push({
           message: message.message,
           lang,
+          en: lang === 'en' ? message.message : '',
+          es: lang === 'es' ? message.message : '',
         })
       }
 
@@ -113,8 +115,13 @@
             <Cell />
           {/if}
 
-          <Cell />
-          <Cell />
+          <Cell
+            >{#if data.en}<Textfield bind:value={data.en} />{/if}</Cell
+          >
+
+          <Cell
+            >{#if data.es}<Textfield bind:value={data.es} />{/if}</Cell
+          >
         </Row>
       {/each}
     </Body>
